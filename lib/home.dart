@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'profile.dart'; // Impor halaman profil
-import 'kategori.dart'; // Impor halaman kategori
+import 'profile.dart'; 
+import 'kategori.dart'; 
 
 void main() {
   runApp(MyApp());
