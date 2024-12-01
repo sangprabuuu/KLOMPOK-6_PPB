@@ -1,0 +1,32 @@
+name: shopee
+description: "A Flutter project combining Shopee and Tubes_PPB."
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.3 <4.0.0" # Versi ini sesuai dengan Dart SDK yang didukung Flutter
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  ionicons: ^0.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Deklarasi aset
+  assets:
+    - assets/avatar.png
+    - assets/logo_shoope.png
+    - assets/logo_shoope_polos.png
+    - assets/google.png
+    - assets/gambar1.jpg
+    - assets/gambar2.jpg
