@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   ionicons: ^0.2.2
+  carousel_slider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -28,5 +29,8 @@ flutter:
     - assets/logo_shoope.png
     - assets/logo_shoope_polos.png
     - assets/google.png
-    - assets/gambar1.jpg
-    - assets/gambar2.jpg
+    - assets/images/gambar1.jpg
+    - assets/images/gambar2.jpg
+    - assets/images/slider1.jpeg
+    - assets/images/slider3.jpeg
+    - assets/images/slider2.jpeg

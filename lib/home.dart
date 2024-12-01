@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'profile.dart'; // Impor halaman profil
 import 'kategori.dart'; // Impor halaman kategori
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Shopee Clone',
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+      ),
+      home: HomePage(),
+    );
+  }
+}
 
 class HomePage extends StatefulWidget {
   @override
@@ -10,7 +29,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  // Daftar halaman untuk navigasi
   final List<Widget> _pages = [
     HomePageContent(), // Konten Home
     KategoriPage(), // Halaman kategori
@@ -21,22 +39,20 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFEE4D2D), // Mail Red
-        elevation: 0,
+        backgroundColor: Color(0xFFEE4D2D), // Shopee Red
         title: Center(
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.9, // Lebar 90% dari layar
-            height: 36, // Tinggi lebih kecil
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: 36,
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Cari di Shopee',
                 hintStyle: TextStyle(color: Colors.grey[700], fontSize: 14),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[700], size: 20),
+                prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(vertical: 5), // Padding atas dan bawah
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20), // Radius lebih kecil
+                  borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -54,7 +70,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: _pages[_currentIndex], // Tampilkan halaman sesuai indeks
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -76,128 +92,141 @@ class _HomePageState extends State<HomePage> {
             label: 'Akun Saya',
           ),
         ],
-        selectedItemColor: Color(0xFFEE4D2D), // Mail Red
+        selectedItemColor: Color(0xFFEE4D2D),
         unselectedItemColor: Colors.grey,
       ),
     );
   }
 }
 
-// Konten Halaman Utama
 class HomePageContent extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 16),
-          // Banner
-          Container(
-            color: Color(0xFF113366), // Men Blue
-            width: double.infinity,
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(
-                  '7.7 PESTA DISKON SUPERMARKET',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'FLASH SALE',
-                  style: TextStyle(
-                    color: Color(0xFFEE4D2D), // Mail Red
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
+  final List<String> sliderImages = [
+    'assets/images/slider1.jpeg',
+    'assets/images/slider2.jpeg',
+    'assets/images/slider3.jpeg',
+  ];
+
+@override
+Widget build(BuildContext context) {
+  return SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 16),
+        // Image Slider
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 200.0,
+              autoPlay: true,
+              enlargeCenterPage: true,
+              viewportFraction: 0.8,
+            ),
+            items: sliderImages.map((imagePath) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    margin: EdgeInsets.symmetric(horizontal: 5.0),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(imagePath),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  );
+                },
+              );
+            }).toList(),
+          ),
+        ),
+        // Fitur
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: GridView.count(
+            crossAxisCount: 4,
+            crossAxisSpacing: 15,
+            mainAxisSpacing: 15,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              _buildFeatureItem(Icons.live_tv, 'Shopee Live'),
+              _buildFeatureItem(Icons.payment, 'ShopeePay'),
+              _buildFeatureItem(Icons.card_giftcard, 'Voucher'),
+              _buildFeatureItem(Icons.widgets, 'Lainnya'),
+            ],
+          ),
+        ),
+        // Flash Sale
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'FLASH SALE',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
-
-          // Fitur
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: GridView.count(
-              crossAxisCount: 4,
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                _buildFeatureItem(Icons.live_tv, 'Shopee Live'),
-                _buildFeatureItem(Icons.payment, 'ShopeePay'),
-                _buildFeatureItem(Icons.card_giftcard, 'Vouchers'),
-                _buildFeatureItem(Icons.widgets, 'Lainnya'),
-              ],
-            ),
-          ),
-
-          // Flash Sale
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'FLASH SALE',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.black,
+        ),
+        SizedBox(height: 8),
+        Container(
+          height: 220,
+          padding: EdgeInsets.only(left: 16),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _buildFlashSaleItem(
+                'assets/images/gambar1.jpg',
+                'Jaket Polos',
+                'Rp150.000',
               ),
-            ),
-          ),
-          SizedBox(height: 8),
-          Container(
-            height: 220,
-            padding: EdgeInsets.only(left: 16),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildFlashSaleItem(
-                    'assets/gambar1.jpg', 'Jaket Polos', 'Rp150.000'),
-                _buildFlashSaleItem(
-                    'assets/gambar2.jpg', 'Jam Benten', 'Rp49.000'),
-                _buildFlashSaleItem(
-                    'assets/gambar1.jpg', 'Jaket Tidak Polos', 'Rp1.200.000'),
-              ],
-            ),
-          ),
-
-          // Kategori
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Text(
-              'Kategori',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.black,
+              _buildFlashSaleItem(
+                'assets/images/gambar2.jpg',
+                'Jam Tangan',
+                'Rp49.000',
               ),
+              _buildFlashSaleItem(
+                'assets/images/gambar1.jpg',
+                'Kacamata',
+                'Rp1.200.000',
+              ),
+            ],
+          ),
+        ),
+        // Kategori
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Text(
+            'Kategori',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.black,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Wrap(
-              spacing: 15,
-              runSpacing: 15,
-              children: [
-                _buildCategoryItem('Fashion'),
-                _buildCategoryItem('Elektronik'),
-                _buildCategoryItem('Rumah Tangga'),
-                _buildCategoryItem('Olahraga'),
-                _buildCategoryItem('Hobi'),
-                _buildCategoryItem('Makanan & Minuman'),
-              ],
-            ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Wrap(
+            spacing: 15,
+            runSpacing: 15,
+            children: [
+              _buildCategoryItem('Fashion'),
+              _buildCategoryItem('Elektronik'),
+              _buildCategoryItem('Rumah Tangga'),
+              _buildCategoryItem('Olahraga'),
+              _buildCategoryItem('Hobi'),
+              _buildCategoryItem('Makanan & Minuman'),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildFeatureItem(IconData icon, String label) {
     return Column(
