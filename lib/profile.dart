@@ -46,7 +46,7 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'naufalananta048',
+                          'Kelompok 6',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
