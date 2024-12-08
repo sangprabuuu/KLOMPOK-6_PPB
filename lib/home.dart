@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'mycart.dart';
 import 'profile.dart'; 
-import 'kategori.dart'; 
+import 'kategori.dart';
 
 void main() {
   runApp(MyApp());
@@ -66,7 +67,12 @@ class _HomePageState extends State<HomePage> {
           ),
           IconButton(
             icon: Icon(Icons.shopping_cart, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyCartPage()),
+              );
+            },
           ),
         ],
       ),
