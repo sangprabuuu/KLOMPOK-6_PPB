@@ -11,9 +11,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  firebase_core: ^2.32.0
+  cloud_firestore: ^4.10.0
+  firebase_auth: ^4.16.0 # Jika menggunakan autentikasi
   cupertino_icons: ^1.0.8
   ionicons: ^0.2.2
   carousel_slider: ^5.0.0
+  shared_preferences_android: ^2.4.0
+  shared_preferences: ^2.3.5
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:

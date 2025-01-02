@@ -1,7 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shopee/addproduct.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  final String userId; // ID pengguna dari Firestore
+
+  const ProfileScreen({super.key, required this.userId});
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  // Variable untuk menyimpan data pengguna
+  Map<String, dynamic>? userData;
+
+  // Fungsi untuk mengambil data dari Firestore
+  Future<void> fetchUserData() async {
+    try {
+      // Ambil dokumen pengguna berdasarkan userId
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('user') // Nama koleksi "user"
+          .doc(widget.userId)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          userData = userDoc.data() as Map<String, dynamic>;
+        });
+        print("Data pengguna: $userData");
+      } else {
+        print("Dokumen tidak ditemukan untuk userId: ${widget.userId}");
+      }
+    } catch (e) {
+      print("Error saat mengambil data pengguna: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData(); // Ambil data pengguna saat widget diinisialisasi
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,123 +61,151 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              // Tambahkan navigasi ke pengaturan
+              // Navigasi ke halaman pengaturan
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Profil
-            Container(
-              color: const Color(0xFFEE4D2D), // Shopee Orange
-              padding: const EdgeInsets.all(16),
-              child: Row(
+      body: userData == null
+          ? const Center(child: CircularProgressIndicator()) // Loading indikator
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
-                    radius: 35,
-                    backgroundImage: AssetImage('assets/avatar.png'),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
+                  // Header Profil
+                  _buildProfileHeader(),
+                  // Pesanan Saya
+                  _buildSection(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Kelompok 6',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text(
+                              'Pesanan Saya',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Lihat Riwayat Pesanan',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF113366), // Men Blue
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          '37 Pengikut  ·  90 Mengikuti',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white70,
-                          ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildOrderOption(Icons.payment, 'Belum Bayar'),
+                            _buildOrderOption(Icons.inventory, 'Dikemas'),
+                            _buildOrderOption(Icons.local_shipping, 'Dikirim'),
+                            _buildOrderOption(Icons.reviews, 'Beri Penilaian'),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                  // Menu Lainnya
+                  _buildSection(
+                    child: Column(
+                      children: [
+                        _buildMenuTile(
+                          icon: Icons.account_balance_wallet,
+                          title: 'ShopeePay',
+                          onTap: () {
+                            // Tambahkan navigasi ke ShopeePay
+                          },
+                        ),
+                        const Divider(height: 1),
+                        _buildMenuTile(
+                          icon: Icons.card_giftcard,
+                          title: 'Voucher Saya',
+                          onTap: () {
+                            // Navigasi ke Voucher Saya
+                          },
+                        ),
+                        const Divider(height: 1),
+                        _buildMenuTile(
+                          icon: Icons.money,
+                          title: 'SPayLater',
+                          onTap: () {
+                            // Navigasi ke SPayLater
+                          },
+                        ),
+                        const Divider(height: 1),
+                        _buildMenuTile(
+                          icon: Icons.add,
+                          title: 'Tambah Produk',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddProductPage(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            // Pesanan Saya Section
-            _buildSection(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        'Pesanan Saya',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Lihat Riwayat Pesanan',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF113366), // Men Blue
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+    );
+  }
+
+  Widget _buildProfileHeader() {
+    return Container(
+      color: const Color(0xFFEE4D2D), // Shopee Orange
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 35,
+            backgroundImage: AssetImage('assets/avatar.png'),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: userData == null
+                ? const Center(child: CircularProgressIndicator()) // Loading
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildOrderOption(Icons.payment, 'Belum Bayar'),
-                      _buildOrderOption(Icons.inventory, 'Dikemas'),
-                      _buildOrderOption(Icons.local_shipping, 'Dikirim'),
-                      _buildOrderOption(Icons.reviews, 'Beri Penilaian'),
+                      Text(
+                        userData?['username'] ?? 'Nama Tidak Ditemukan',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        userData?['email'] ?? 'Email Tidak Ditemukan',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                      ),
                     ],
                   ),
-                ],
-              ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Tambahkan aksi untuk Edit Profil
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFFEE4D2D), // Shopee Orange
             ),
-            // Menu Lainnya
-            _buildSection(
-              child: Column(
-                children: [
-                  _buildMenuTile(Icons.account_balance_wallet, 'ShopeePay'),
-                  const Divider(height: 1),
-                  _buildMenuTile(Icons.card_giftcard, 'Voucher Saya'),
-                  const Divider(height: 1),
-                  _buildMenuTile(Icons.money, 'SPayLater'),
-                  const Divider(height: 1),
-                  _buildMenuTile(Icons.support, 'Asuransi'),
-                ],
-              ),
-            ),
-            // Aktivitas Saya
-            _buildSection(
-              title: 'Aktivitas Saya',
-              child: Column(
-                children: [
-                  _buildMenuTile(Icons.favorite, 'Favorit Saya'),
-                  const Divider(height: 1),
-                  _buildMenuTile(Icons.store, 'Shopee Affiliate Program'),
-                  const Divider(height: 1),
-                  _buildMenuTile(Icons.live_tv, 'Live dan Video'),
-                ],
-              ),
-            ),
-          ],
-        ),
+            child: const Text('Edit Profil'),
+          ),
+        ],
       ),
     );
   }
@@ -177,7 +245,11 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuTile(IconData icon, String title) {
+  Widget _buildMenuTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: Icon(icon, color: const Color(0xFFEE4D2D)), // Shopee Orange
       title: Text(
@@ -189,9 +261,7 @@ class ProfileScreen extends StatelessWidget {
         size: 16,
         color: Colors.grey,
       ),
-      onTap: () {
-        // Tambahkan navigasi ke halaman terkait
-      },
+      onTap: onTap,
     );
   }
 }

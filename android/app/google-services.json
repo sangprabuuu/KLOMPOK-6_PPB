@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "484166284664",
+    "project_id": "rebuild-shopee-13972",
+    "storage_bucket": "rebuild-shopee-13972.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484166284664:android:94f1666c311f5b113f448d",
+        "android_client_info": {
+          "package_name": "com.example.shopee"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdcuThjA_WMQWSt7mdbmprFCmL69px7Kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

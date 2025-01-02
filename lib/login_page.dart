@@ -1,10 +1,70 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
-import 'register_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'home.dart';
+import 'register_page.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  // Secure Storage untuk menyimpan data login
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  // Fungsi untuk login pengguna
+  Future<void> loginUser() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        // Ambil nilai input pengguna
+        String phone = _phoneController.text.trim();
+        String password = _passwordController.text.trim();
+
+        // Query Firestore untuk mencocokkan data pengguna
+        final QuerySnapshot snapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .where('phone', isEqualTo: phone)
+            .where('password', isEqualTo: password)
+            .get();
+
+        if (snapshot.docs.isNotEmpty) {
+          // Dapatkan userId dari dokumen
+          String userId = snapshot.docs.first.id;
+
+          print("Login berhasil! User ID: $userId");
+
+          // Simpan userId ke Secure Storage
+          await _storage.write(key: 'userId', value: userId);
+
+          // Navigasi ke halaman HomePage dengan userId
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(userId: userId), // Kirim userId ke HomePage
+            ),
+          );
+        } else {
+          // Jika data tidak ditemukan
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Nomor telepon atau password salah!')),
+          );
+        }
+      } catch (e) {
+        // Tampilkan pesan error jika ada masalah
+        print("Error saat login: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,142 +80,106 @@ class LoginPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/logo_shoope_polos.png'),
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.phone),
-                      hintText: '(+62) 821-*****-***',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock),
-                      hintText: 'Password',
-                      suffixIcon: Icon(Icons.visibility),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'Lupa?',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(),
-                        ),
-                      );
-                    },
-                    child: Text('Login'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFEE4D2D),
-                      foregroundColor: Colors.white,
-                      minimumSize: Size(double.infinity, 50),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'ATAU',
-                    style: TextStyle(
-                      color: const Color.fromARGB(255, 183, 118, 118),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Column(
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: Image.asset(
-                          'assets/google.png',
-                          width: 20,
-                          height: 20,
+                      // Logo Shopee
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/logo_shoope_polos.png'),
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                        label: Text(
-                          'Google',
+                      ),
+                      SizedBox(height: 20),
+                      // Input Nomor Telepon
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.phone),
+                          hintText: '(+62) 821-*****-***',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nomor telepon tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      // Input Password
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock),
+                          hintText: 'Password',
+                          suffixIcon: Icon(Icons.visibility),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password tidak boleh kosong';
+                          } else if (value.length < 6) {
+                            return 'Password minimal 6 karakter';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      // Tombol Login
+                      ElevatedButton(
+                        onPressed: loginUser,
+                        child: Text('Login'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEE4D2D),
+                          foregroundColor: Colors.white,
+                          minimumSize: Size(double.infinity, 50),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      // Link ke Halaman Registrasi
+                      RichText(
+                        text: TextSpan(
+                          text: 'Belum punya akun? ',
                           style: TextStyle(color: Colors.black),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: BorderSide(color: Colors.grey),
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: Icon(Ionicons.logo_facebook, color: Colors.blue),
-                        label: Text('Facebook'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: BorderSide(color: Colors.grey),
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: Icon(Ionicons.logo_whatsapp, color: Colors.green),
-                        label: Text('WhatsApp'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: BorderSide(color: Colors.grey),
+                          children: [
+                            TextSpan(
+                              text: 'Daftar',
+                              style: TextStyle(color: Colors.blue),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterPage(),
+                                    ),
+                                  );
+                                },
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
-                  RichText(
-                    text: TextSpan(
-                      text: 'Belum punya akun? ',
-                      style: TextStyle(color: Colors.black),
-                      children: [
-                        TextSpan(
-                          text: 'Daftar',
-                          style: TextStyle(color: Colors.blue),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => RegisterPage(),
-                                ),
-                              );
-                            },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
