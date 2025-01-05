@@ -1,0 +1,54 @@
+name: shopee
+description: "A Flutter project combining Shopee and Tubes_PPB."
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.3 <4.0.0" # Versi ini sesuai dengan Dart SDK yang didukung Flutter
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  firebase_core: ^2.32.0
+  cloud_firestore: ^4.10.0
+  firebase_auth: ^4.16.0 # Jika menggunakan autentikasi
+  cupertino_icons: ^1.0.8
+  ionicons: ^0.2.2
+  carousel_slider: ^5.0.0
+  shared_preferences_android: ^2.4.0
+  shared_preferences: ^2.3.5
+  flutter_secure_storage: ^9.2.2
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.9.2
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo_shoope_polos.png" # Ganti dengan path logo
+
+flutter:
+  uses-material-design: true
+
+  # Deklarasi aset
+  assets:
+    - assets/avatar.png
+    - assets/logo_shoope.png
+    - assets/logo_shoope_polos.png
+    - assets/google.png
+    - assets/images/slider1.jpeg
+    - assets/images/slider3.jpeg
+    - assets/images/slider3.jpeg
+    - assets/images/slider2.jpeg
+    - assets/icons/wallet.png
+    - assets/icons/plus.png
+    - assets/icons/gift.png
+    - assets/icons/other.png
+    - assets/icons/food.png

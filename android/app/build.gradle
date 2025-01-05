@@ -1,0 +1,44 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.google.gms.google-services' // Gunakan tanpa versi
+}
+
+android {
+    namespace = "com.example.shopee"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+defaultConfig {
+    applicationId "com.example.shopee"
+    minSdkVersion 23 // Ubah ke 23 untuk mendukung flutter_secure_storage
+    targetSdkVersion flutter.targetSdkVersion
+    versionCode flutter.versionCode
+    versionName flutter.versionName
+}
+
+
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+// Tambahkan baris ini untuk Google Services
+apply plugin: 'com.google.gms.google-services'
