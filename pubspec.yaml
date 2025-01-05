@@ -21,11 +21,18 @@ dependencies:
   shared_preferences_android: ^2.4.0
   shared_preferences: ^2.3.5
   flutter_secure_storage: ^9.2.2
+  http: ^1.2.2
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.9.2
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo_shoope_polos.png" # Ganti dengan path logo
 
 flutter:
   uses-material-design: true
@@ -36,8 +43,12 @@ flutter:
     - assets/logo_shoope.png
     - assets/logo_shoope_polos.png
     - assets/google.png
-    - assets/images/gambar1.jpg
-    - assets/images/gambar2.jpg
     - assets/images/slider1.jpeg
     - assets/images/slider3.jpeg
+    - assets/images/slider3.jpeg
     - assets/images/slider2.jpeg
+    - assets/icons/wallet.png
+    - assets/icons/plus.png
+    - assets/icons/gift.png
+    - assets/icons/other.png
+    - assets/icons/food.png

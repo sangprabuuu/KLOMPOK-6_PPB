@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shopee/addproduct.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   final String userId; // ID pengguna dari Firestore
@@ -135,19 +135,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           title: 'SPayLater',
                           onTap: () {
                             // Navigasi ke SPayLater
-                          },
-                        ),
-                        const Divider(height: 1),
-                        _buildMenuTile(
-                          icon: Icons.add,
-                          title: 'Tambah Produk',
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AddProductPage(),
-                              ),
-                            );
                           },
                         ),
                       ],

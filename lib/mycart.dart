@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyCartPage extends StatefulWidget {
-  final String userId; // Tambahkan userId untuk mengidentifikasi pengguna
+  final String userId;
 
   const MyCartPage({Key? key, required this.userId}) : super(key: key);
 
@@ -11,10 +11,7 @@ class MyCartPage extends StatefulWidget {
 }
 
 class _MyCartPageState extends State<MyCartPage> {
-  bool _isSearchBarVisible = false; // Untuk mengontrol visibilitas search bar
   TextEditingController _searchController = TextEditingController();
-  Map<String, bool> _selectedItems =
-      {}; // Menyimpan status pilihan setiap produk
 
   @override
   Widget build(BuildContext context) {
@@ -26,50 +23,43 @@ class _MyCartPageState extends State<MyCartPage> {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: _isSearchBarVisible
-            ? TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Cari barang di keranjang',
-                  prefixIcon: Icon(Icons.search, color: Colors.red),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {}); // Memicu pembaruan UI
-                },
-              )
-            : Text(
-                "Keranjang Saya",
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 0, 0, 0),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-        actions: [
-          if (!_isSearchBarVisible)
-            IconButton(
-              icon: Icon(Icons.search, color: Colors.red),
-              onPressed: () {
-                setState(() {
-                  _isSearchBarVisible = true; // Menampilkan search bar
-                });
-              },
-            ),
-        ],
+        title: Text(
+          "Keranjang Saya",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Column(
         children: [
+          // Input pencarian
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Cari barang di keranjang',
+                prefixIcon: Icon(Icons.search, color: Colors.red),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {}); // Memicu pembaruan UI saat pencarian
+              },
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('cart')
-                  .where('userId', isEqualTo: widget.userId)
+                  .collection('users')
+                  .doc(widget.userId)
+                  .collection('keranjang') // Pastikan nama koleksi sesuai
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -101,26 +91,19 @@ class _MyCartPageState extends State<MyCartPage> {
                       return Container();
                     }
 
-                    // Pastikan status pilihan produk tersimpan
-                    _selectedItems[cartItem.id] ??= false;
-
                     return _buildCartItem(
                       cartId: cartItem.id,
-                      shopName: cartData['shopName'] ?? 'Toko Tidak Diketahui',
+                      productName: cartData['productName'] ?? 'Produk Tidak Diketahui',
                       imageUrl: cartData['imageUrl'] ?? '',
-                      productName:
-                          cartData['productName'] ?? 'Produk Tidak Diketahui',
-                      variation: cartData['variation'] ?? '-',
                       price: cartData['price'] ?? 0,
                       quantity: cartData['quantity'] ?? 1,
+                      description: cartData['description'] ?? '',
                     );
                   },
                 );
               },
             ),
           ),
-          Divider(height: 1, color: const Color.fromARGB(255, 56, 55, 55)),
-          _buildBottomBar(),
         ],
       ),
     );
@@ -128,185 +111,106 @@ class _MyCartPageState extends State<MyCartPage> {
 
   Widget _buildCartItem({
     required String cartId,
-    required String shopName,
-    required String imageUrl,
     required String productName,
-    required String variation,
-    required int price,
+    required String imageUrl,
+    required double price,
     required int quantity,
+    required String description,
   }) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      padding: EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromARGB(255, 75, 72, 72)),
+        border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Checkbox(
-                    value: _selectedItems[cartId],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedItems[cartId] = value!;
-                      });
-                    },
-                  ),
-                  Icon(Icons.store, color: Colors.red, size: 20),
-                  SizedBox(width: 4),
-                  Text(shopName, style: TextStyle(fontWeight: FontWeight.bold)),
-                ],
-              ),
-              IconButton(
-                onPressed: () {
-                  // Hapus item dari cart
-                  FirebaseFirestore.instance
-                      .collection('cart')
-                      .doc(cartId)
-                      .delete();
-                },
-                icon: Icon(Icons.delete, color: Colors.red),
-              ),
-            ],
+          // Gambar produk
+          Image.network(
+            imageUrl,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 80,
+                height: 80,
+                color: Colors.grey[300],
+                child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
+              );
+            },
           ),
-          Row(
-            children: [
-              Image.network(imageUrl, width: 80, height: 80, fit: BoxFit.cover),
-              SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(width: 8),
+          // Detail produk
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  productName,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Rp${price.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
                   children: [
-                    Text(productName,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 4),
-                    Text(variation, style: TextStyle(color: Colors.grey)),
-                    SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Rp${price.toString()}',
-                          style: TextStyle(
-                              color: Colors.red, fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                // Kurangi jumlah
-                                if (quantity > 1) {
-                                  FirebaseFirestore.instance
-                                      .collection('cart')
-                                      .doc(cartId)
-                                      .update({'quantity': quantity - 1});
-                                }
-                              },
-                              icon: Icon(Icons.remove_circle_outline),
-                              color: Colors.grey,
-                            ),
-                            Text('$quantity',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            IconButton(
-                              onPressed: () {
-                                // Tambah jumlah
-                                FirebaseFirestore.instance
-                                    .collection('cart')
-                                    .doc(cartId)
-                                    .update({'quantity': quantity + 1});
-                              },
-                              icon: Icon(Icons.add_circle_outline),
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
-                      ],
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: quantity > 1
+                          ? () {
+                              FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(widget.userId)
+                                  .collection('keranjang')
+                                  .doc(cartId)
+                                  .update({'quantity': quantity - 1});
+                            }
+                          : null,
+                    ),
+                    Text(
+                      '$quantity',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () {
+                        FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userId)
+                            .collection('keranjang')
+                            .doc(cartId)
+                            .update({'quantity': quantity + 1});
+                      },
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+          // Tombol hapus
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () {
+              FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(widget.userId)
+                  .collection('keranjang')
+                  .doc(cartId)
+                  .delete();
+            },
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            onPressed: () => _checkoutSelectedItems(),
-            child: Text(
-              'Checkout',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _checkoutSelectedItems() async {
-    final selectedCartIds = _selectedItems.keys
-        .where((cartId) => _selectedItems[cartId] == true)
-        .toList();
-
-    if (selectedCartIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Pilih produk untuk di-checkout!")),
-      );
-      return;
-    }
-
-    List<Map<String, dynamic>> orderItems = [];
-
-    for (String cartId in selectedCartIds) {
-      final cartItem =
-          await FirebaseFirestore.instance.collection('cart').doc(cartId).get();
-
-      if (cartItem.exists && cartItem.data() != null) {
-        // Jika dokumen ada dan memiliki data
-        orderItems.add(cartItem.data()!);
-
-        // Hapus item dari cart setelah checkout
-        await cartItem.reference.delete();
-      } else {
-        // Log jika ada dokumen yang tidak ditemukan
-        print("Cart item dengan ID $cartId tidak ditemukan atau kosong.");
-      }
-    }
-
-    if (orderItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Tidak ada item yang valid untuk di-checkout!")),
-      );
-      return;
-    }
-
-    // Simpan order ke Firestore
-    await FirebaseFirestore.instance.collection('orders').add({
-      'userId': widget.userId,
-      'items': orderItems,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Checkout berhasil!")),
     );
   }
 }
